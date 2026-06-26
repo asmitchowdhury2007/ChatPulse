@@ -43,7 +43,6 @@ async function signup(req,res){
             return res.status(201).json({
                 _id : newUser._id,
                 email : newUser.email,
-                password : newUser.password,
                 profilePic : newUser.profilePic,
             })
         }
