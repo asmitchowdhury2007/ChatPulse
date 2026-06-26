@@ -37,7 +37,7 @@ async function signup(req,res){
             res.cookie("uid",token,{
                 maxAge : 7*24*60*60*1000,
                 httpOnly: true,         
-                secure:process.env.NODE_ENV==="production"?false : true,       
+                secure:process.env.NODE_ENV==="production",       
                 sameSite: "strict"
             });
             return res.status(201).json({
