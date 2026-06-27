@@ -5,12 +5,13 @@ const messageRoute = require("./routes/message.route");
 const path = require("path");
 const {ConnectionDB} = require("./lib/db")
 const app = express();
+const cookieParser = require("cookie-parser")
 
 ConnectionDB(process.env.MONGO_URI).then(() => console.log("MongoDB running..."));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));;
-
+app.use(cookieParser());
 
 app.use("/api/auth",authRoute);
 app.use("/api/messages", messageRoute);
