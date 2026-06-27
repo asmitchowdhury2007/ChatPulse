@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const welcomeEmailTemplate = (fullname) => `
 <!DOCTYPE html>
 <html lang="en">
