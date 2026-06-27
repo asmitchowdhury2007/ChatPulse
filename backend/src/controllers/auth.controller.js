@@ -100,7 +100,11 @@ async function profilePic(req,res){
         { $set: { profilePic: resultPic.secure_url } },
         { new: true }
     )
-    return res.status(200).json(UpdatedUser);
+    return res.status(200).json({
+        _id : UpdatedUser._id,
+        email : UpdatedUser.email,
+        profilePic : UpdatedUser.profilePic,
+    });
 }
 
 module.exports = {
