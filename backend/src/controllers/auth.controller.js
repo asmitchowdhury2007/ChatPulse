@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const user = require("../models/user");
 const {generateToken} = require("../lib/utils");
 require("dotenv").config();
+const {sendEmail} = require("../email/emailHandler")
 
 async function signup(req,res){
     const {fullname,email,password} = req.body;
@@ -40,6 +41,7 @@ async function signup(req,res){
                 secure:process.env.NODE_ENV==="production",       
                 sameSite: "strict"
             });
+            await sendEmail(newUser.fullname, newUser.email);
             return res.status(201).json({
                 _id : newUser._id,
                 email : newUser.email,
