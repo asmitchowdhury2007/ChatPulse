@@ -3,6 +3,7 @@ const user = require("../models/user");
 const {generateToken} = require("../lib/utils");
 require("dotenv").config();
 const {sendEmail} = require("../email/emailHandler")
+const cloudinary = require("../lib/cloudinary")
 
 async function signup(req,res){
     const {fullname,email,password} = req.body;
@@ -89,10 +90,26 @@ async function logout (req,res){
     return res.status(200).json({ message: "Logged out successfully" });
 
 }
-
+async function profilePic(req,res){
+    const {profilePic} = req.body;
+    if(!profilePic) return res.status(400).json({message:"Profile Pic is required"});
+    const userId = req.user._id;
+    const resultPic = await cloudinary.uploader.upload(profilePic);
+    const UpdatedUser = await user.findByIdAndUpdate(
+        userId,
+        { $set: { profilePic: resultPic.secure_url } },
+        { new: true }
+    )
+    return res.status(200).json({
+        _id : UpdatedUser._id,
+        email : UpdatedUser.email,
+        profilePic : UpdatedUser.profilePic,
+    });
+}
 
 module.exports = {
     signup,
     login,
     logout,
+    profilePic,
 }
