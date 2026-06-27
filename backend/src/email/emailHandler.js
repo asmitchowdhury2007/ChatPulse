@@ -13,6 +13,7 @@ async function sendEmail(fullname,email){
             html: welcomeEmailTemplate(fullname),
         })
         console.log(`welcome message send to email : ${email}`);
+        
     }
     catch(err){
         console.log(`Error in sending message to ${email}:`, err.message);
