@@ -1,6 +1,7 @@
-require("dotenv").config();
-const {Resend} = require("resend")
-const {welcomeEmailTemplate} = require("./emailTemplate");
+import dotenv from "dotenv";
+dotenv.config();
+import {Resend} from"resend";
+import {welcomeEmailTemplate} from "./emailTemplate.js";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -19,6 +20,6 @@ async function sendEmail(fullname,email){
         console.log(`Error in sending message to ${email}:`, err.message);
     }
 }
-module.exports ={
+export{
     sendEmail,
 }

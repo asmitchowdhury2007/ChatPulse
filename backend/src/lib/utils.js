@@ -1,6 +1,7 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
 
 function generateToken(id){
@@ -19,7 +20,7 @@ function verifyToken(token){
     
 }
 
-module.exports = {
+export{
     generateToken,
     verifyToken,
 }

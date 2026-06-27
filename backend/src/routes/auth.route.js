@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {signup,login,logout,profilePic} = require("../controllers/auth.controller");
-const {protectRoute} = require("../middleware/auth.middleware")
+import {signup,login,logout,profilePic} from "../controllers/auth.controller.js";
+import {protectRoute}  from "../middleware/auth.middleware.js";
 
 router.post("/signup",signup);
 
@@ -11,4 +11,4 @@ router.post("/logout",logout);
 
 router.put("/profilePic",protectRoute, profilePic);
 
-module.exports = router;
+export default router;

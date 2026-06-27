@@ -1,5 +1,5 @@
-const {verifyToken} = require("../lib/utils")
-const user = require("../models/user");
+import {verifyToken} from"../lib/utils.js"
+import user from"../models/user.js";
 
 async function protectRoute(req,res,next){
     const token = req.cookie.uid;
@@ -20,6 +20,6 @@ async function protectRoute(req,res,next){
         return res.status(401).json({ message: "Unauthorised" });
     }
 }
-module.exports ={
+export{
     protectRoute,
 }

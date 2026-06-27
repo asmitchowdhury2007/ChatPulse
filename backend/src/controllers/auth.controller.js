@@ -1,9 +1,10 @@
-const bcrypt = require("bcryptjs");
-const user = require("../models/user");
-const {generateToken} = require("../lib/utils");
-require("dotenv").config();
-const {sendEmail} = require("../email/emailHandler")
-const cloudinary = require("../lib/cloudinary")
+import bcrypt from "bcryptjs";
+import user from "../models/user.js";
+import {generateToken} from"../lib/utils.js";
+import dotenv from "dotenv";
+dotenv.config();
+import{sendEmail} from "../email/emailHandler.js";
+import cloudinary from"../lib/cloudinary.js"
 
 async function signup(req,res){
     const {fullname,email,password} = req.body;
@@ -107,7 +108,7 @@ async function profilePic(req,res){
     });
 }
 
-module.exports = {
+export{
     signup,
     login,
     logout,

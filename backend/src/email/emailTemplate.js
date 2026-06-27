@@ -1,4 +1,5 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
 const welcomeEmailTemplate = (fullname) => `
 <!DOCTYPE html>
@@ -314,6 +315,6 @@ const welcomeEmailTemplate = (fullname) => `
 </body>
 </html>
 `;
-module.exports ={
+export{
     welcomeEmailTemplate
 }

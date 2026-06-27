@@ -1,13 +1,19 @@
-require("dotenv").config();
-const express = require("express");
-const authRoute = require("./routes/auth.route");
-const messageRoute = require("./routes/message.route");
-const path = require("path");
-const {ConnectionDB} = require("./lib/db")
+import dotenv from "dotenv";
+dotenv.config();
+import express from "express"
+import authRoute from "./routes/auth.route.js";
+import messageRoute  from "./routes/message.route.js";
+import { fileURLToPath } from "url";
+
+import path from "path";
+import {ConnectionDB} from "./lib/db.js"
 const app = express();
-const cookieParser = require("cookie-parser")
+import cookieParser from "cookie-parser";
 
 ConnectionDB(process.env.MONGO_URI).then(() => console.log("MongoDB running..."));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));;
