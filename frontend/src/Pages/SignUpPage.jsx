@@ -7,7 +7,7 @@ import "../Components/Signup.css"
 function SignupPage() {
 
   const navigate  = useNavigate()
-  const { signup, isLoading, error } = useAuthStore()
+  const { signup, isSigningUp  } = useAuthStore()
 
   const [formData, setFormData] = useState({
     fullname: "",
