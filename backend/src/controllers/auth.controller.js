@@ -101,7 +101,7 @@ async function profilePic(req,res){
     const UpdatedUser = await user.findByIdAndUpdate(
         userId,
         { $set: { profilePic: resultPic.secure_url } },
-        { new: true }
+        { returnDocument: "after" }
     )
     return res.status(200).json({
         _id : UpdatedUser._id,
