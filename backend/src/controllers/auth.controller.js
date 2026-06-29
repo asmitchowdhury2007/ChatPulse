@@ -46,6 +46,7 @@ async function signup(req,res){
             await sendEmail(newUser.fullname, newUser.email);
             return res.status(201).json({
                 _id : newUser._id,
+                fullname : newUser.fullname,
                 email : newUser.email,
                 profilePic : newUser.profilePic,
             })
@@ -73,9 +74,10 @@ async function login (req,res){
             sameSite: "strict"
         });
         return res.status(201).json({
-            _id : newUser._id,
-            email : newUser.email,
-            profilePic : newUser.profilePic,
+            _id : User._id,
+            fullname: User.fullname,
+            email : User.email,
+            profilePic : User.profilePic,
         })
         
     }
