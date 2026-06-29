@@ -12,7 +12,7 @@ const MOCK_CONTACTS = [
 ]
 
 const MOCK_CHATS = [
-  { id: 1, name: "Aria Mehta", avatar: "AM", status: "online", lastMsg: "Are you free tonight? 🎉", time: "12:42 PM", unread: 2 },
+  { id: 1, name: "Aria Mehta", avatar: "AM", status: "online", lastMsg: "Argentina will win the world cup", time: "12:42 PM", unread: 2 },
   { id: 2, name: "Dev Sharma", avatar: "DS", status: "online", lastMsg: "Pushed the fix, check it out", time: "11:15 AM", unread: 0 },
   { id: 3, name: "Kiran Roy", avatar: "KR", status: "away", lastMsg: "Sounds good, see you then!", time: "Yesterday", unread: 0 },
   { id: 4, name: "Priya Nair", avatar: "PN", status: "offline", lastMsg: "Thanks for your help 🙏", time: "Mon", unread: 1 },
