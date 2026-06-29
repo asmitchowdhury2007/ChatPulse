@@ -7,7 +7,7 @@ import "../Components/Signup.css"
 function SignupPage() {
 
   const navigate  = useNavigate()
-  const { signup, isSigningUp  } = useAuthStore()
+  const { signup, isSigningUp, error } = useAuthStore()
 
   const [formData, setFormData] = useState({
     fullname: "",
@@ -56,8 +56,8 @@ function SignupPage() {
   // ─── Handle submit ────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!validate()) return
-    await signup(formData.fullname, formData.email, formData.password)
-    if (!error) navigate("/")
+    await signup(formData);
+    
   }
 
   const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"][passwordStrength]
@@ -79,7 +79,7 @@ function SignupPage() {
     input:      (err) => ({ width: "100%", background: "rgba(30,41,59,0.8)", border: `0.5px solid ${err ? "rgba(239,68,68,0.6)" : "rgba(99,130,246,0.2)"}`, borderRadius: "8px", padding: "10px 14px 10px 38px", color: "#e2e8f0", fontSize: "14px", outline: "none", boxSizing: "border-box" }),
     errMsg:     { fontSize: "11px", color: "#f87171", marginTop: "4px", marginBottom: "8px" },
     apiError:   { fontSize: "13px", color: "#f87171", textAlign: "center", marginBottom: "12px", padding: "10px", background: "rgba(239,68,68,0.1)", borderRadius: "8px", border: "0.5px solid rgba(239,68,68,0.3)" },
-    btn:        { width: "100%", background: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", padding: "11px", fontSize: "14px", fontWeight: "500", cursor: "pointer", marginTop: "8px", opacity: isLoading ? 0.7 : 1 },
+    btn:        { width: "100%", background: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", padding: "11px", fontSize: "14px", fontWeight: "500", cursor: "pointer", marginTop: "8px", opacity: isSigningUp ? 0.7 : 1 },
     switchText: { textAlign: "center", fontSize: "13px", color: "rgba(148,163,184,0.6)", marginTop: "16px" },
   }
 
@@ -170,8 +170,8 @@ function SignupPage() {
           {errors.password && <p style={s.errMsg}>⚠ {errors.password}</p>}
         </div>
 
-        <button style={s.btn} onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? "Creating account..." : "Create account"}
+        <button style={s.btn} onClick={handleSubmit} disabled={isSigningUp}>
+          {isSigningUp ? "Creating account..." : "Create account"}
         </button>
 
         <p style={s.switchText}>

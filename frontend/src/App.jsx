@@ -8,12 +8,12 @@ import { useEffect } from "react"
 import {Toaster} from "react-hot-toast"
 
 function App() {
-  const {authUser,isCheckingAuth,checkAuth} = useAuthStore();
+  const { authUser, isCheckingAuth, checkAuth} = useAuthStore();
   useEffect(() => {
     checkAuth()
   },[checkAuth])
   console.log({authUser});
-  if(isCheckingAuth) return <pathLoader />
+  if (isCheckingAuth) return null 
   return (
   <>
   
