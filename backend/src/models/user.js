@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
         required:true,
-        minlength : 9,
+        minlength :8,
     },
     profilePic :{
         type:String,
