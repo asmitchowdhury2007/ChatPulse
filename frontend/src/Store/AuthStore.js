@@ -8,6 +8,7 @@ const useAuthStore = create((set) => ({
     isCheckingAuth : true,
     isSigningUp : false,
     isLoggingIn : false,
+    isUpdatingPic:false,
     
     checkAuth: async() => {
         try{
@@ -57,7 +58,24 @@ const useAuthStore = create((set) => ({
         } catch(err){
             toast.error("Error Logging Out");
         }
-    }
+    },
+
+    updateProfilePic: async (base64Image) => {
+        set({ isUpdatingPic: true });
+        try {
+            const res = await axiosInstance.put("/auth/profilePic", { profilePic: base64Image });
+            // store the cloudinary URL inside authUser
+            set((state) => ({
+                authUser: { ...state.authUser, profilePic: res.data.profilePic }
+            }));
+            toast.success("Profile photo updated!");
+            return res.data.profilePic   // return URL so UI can use it
+        } catch (err) {
+            toast.error("Failed to update profile photo");
+        } finally {
+            set({ isUpdatingPic: false });
+        }
+    },
 }))
 
 
