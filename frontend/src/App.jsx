@@ -1,24 +1,29 @@
 
-import { Routes, Route } from "react-router" 
+import { Routes, Route,Navigate } from "react-router" 
 import ChatPage from "./pages/ChatPage.jsx"
 import LoginPage from "./pages/LoginPage.jsx"
 import SignupPage from "./pages/SignupPage.jsx"
 import useAuthStore from "./Store/AuthStore.js"
+import { useEffect } from "react"
+import {Toaster} from "react-hot-toast"
 
 function App() {
-  const { login } = useAuthStore()
+  const {authUser,isCheckingAuth,checkAuth} = useAuthStore();
+  useEffect(() => {
+    checkAuth()
+  },[checkAuth])
+  console.log({authUser});
+  if(isCheckingAuth) return <pathLoader />
   return (
   <>
   
-    <button onClick={login} className="z-10">
-      login
-    </button>
+    
     <Routes>
-      <Route path="/"       element={<ChatPage />} />
-      <Route path="/login"  element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/"       element={ authUser ? <ChatPage /> :  <Navigate to="/login" />} />
+      <Route path="/login"  element={!authUser? <LoginPage /> : <Navigate to="/" />} />
+      <Route path="/signup" element={!authUser ?<SignupPage /> : <Navigate to="/" />} />
     </Routes>
-  
+    <Toaster/>
   </>
   )
 }
