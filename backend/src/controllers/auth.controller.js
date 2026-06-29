@@ -109,10 +109,21 @@ async function profilePic(req,res){
         profilePic : UpdatedUser.profilePic,
     });
 }
-
+async function checkAuth(req, res) {
+    try {
+        res.status(200).json({
+            user: req.user,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Internal Server Error",
+        });
+    }
+};
 export{
     signup,
     login,
     logout,
     profilePic,
+    checkAuth,
 }

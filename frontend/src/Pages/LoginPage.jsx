@@ -6,7 +6,7 @@ import useAuthStore from "../Store/AuthStore.js"
 function LoginPage() {
 
   const navigate = useNavigate()
-  const { login,isLoggingIn} = useAuthStore()
+  const {login, isLoggingIn, error} = useAuthStore()
 
   const [formData, setFormData] = useState({
     email: "",
@@ -28,8 +28,8 @@ function LoginPage() {
     const newErrors = {}
     if (!emailRegex.test(formData.email))
       newErrors.email = "Enter a valid email address"
-    if (formData.password.length < 6)
-      newErrors.password = "Password must be at least 6 characters"
+    if (formData.password.length < 8)
+      newErrors.password = "Password must be at least 8 characters"
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -37,8 +37,8 @@ function LoginPage() {
   // ─── Handle submit ────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!validate()) return
-    await login(formData.email, formData.password)
-    if (!error) navigate("/")
+    await login(formData);
+    
   }
 
   // ─── Styles ───────────────────────────────────────────────────
@@ -57,7 +57,7 @@ function LoginPage() {
     input:      (err) => ({ width: "100%", background: "rgba(30,41,59,0.8)", border: `0.5px solid ${err ? "rgba(239,68,68,0.6)" : "rgba(99,130,246,0.2)"}`, borderRadius: "8px", padding: "10px 14px 10px 38px", color: "#e2e8f0", fontSize: "14px", outline: "none", boxSizing: "border-box" }),
     errMsg:     { fontSize: "11px", color: "#f87171", marginTop: "4px", marginBottom: "8px" },
     apiError:   { fontSize: "13px", color: "#f87171", textAlign: "center", marginBottom: "12px", padding: "10px", background: "rgba(239,68,68,0.1)", borderRadius: "8px", border: "0.5px solid rgba(239,68,68,0.3)" },
-    btn:        { width: "100%", background: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", padding: "11px", fontSize: "14px", fontWeight: "500", cursor: "pointer", marginTop: "8px", opacity: isLoading ? 0.7 : 1 },
+    btn:        { width: "100%", background: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", padding: "11px", fontSize: "14px", fontWeight: "500", cursor: "pointer", marginTop: "8px", opacity: isLoggingIn ? 0.7 : 1 },
     divider:    { display: "flex", alignItems: "center", gap: "10px", margin: "16px 0" },
     dividerLine:{ flex: 1, height: "0.5px", background: "rgba(99,130,246,0.2)" },
     switchText: { textAlign: "center", fontSize: "13px", color: "rgba(148,163,184,0.6)", marginTop: "8px" },
@@ -113,8 +113,8 @@ function LoginPage() {
           {errors.password && <p style={s.errMsg}>⚠ {errors.password}</p>}
         </div>
 
-        <button style={s.btn} onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? "Signing in..." : "Sign in"}
+        <button style={s.btn} onClick={handleSubmit} disabled={isLoggingIn}>
+          {isLoggingIn ? "Signing in..." : "Sign in"}
         </button>
 
         <div style={s.divider}>
