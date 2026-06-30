@@ -12,11 +12,11 @@ const MOCK_CONTACTS = [
 ]
 
 const MOCK_CHATS = [
-  { id: 1, name: "Aria Mehta",  avatar: "AM", status: "online",  lastMsg: "Are you free tonight? 🎉",      time: "12:42 PM", unread: 2 },
-  { id: 2, name: "Dev Sharma",  avatar: "DS", status: "online",  lastMsg: "Pushed the fix, check it out", time: "11:15 AM", unread: 0 },
-  { id: 3, name: "Kiran Roy",   avatar: "KR", status: "away",    lastMsg: "Sounds good, see you then!",   time: "Yesterday",unread: 0 },
-  { id: 4, name: "Priya Nair",  avatar: "PN", status: "offline", lastMsg: "Thanks for your help 🙏",      time: "Mon",      unread: 1 },
-  { id: 5, name: "Rohan Das",   avatar: "RD", status: "online",  lastMsg: "Did you see the match?",       time: "Sun",      unread: 0 },
+  { id: 1, type: "dm", name: "Aria Mehta",  avatar: "AM", status: "online",  lastMsg: "Are you free tonight? 🎉",      time: "12:42 PM", unread: 2 },
+  { id: 2, type: "dm", name: "Dev Sharma",  avatar: "DS", status: "online",  lastMsg: "Pushed the fix, check it out", time: "11:15 AM", unread: 0 },
+  { id: 3, type: "dm", name: "Kiran Roy",   avatar: "KR", status: "away",    lastMsg: "Sounds good, see you then!",   time: "Yesterday",unread: 0 },
+  { id: 4, type: "dm", name: "Priya Nair",  avatar: "PN", status: "offline", lastMsg: "Thanks for your help 🙏",      time: "Mon",      unread: 1 },
+  { id: 5, type: "dm", name: "Rohan Das",   avatar: "RD", status: "online",  lastMsg: "Did you see the match?",       time: "Sun",      unread: 0 },
 ]
 
 const MOCK_MESSAGES = {
@@ -46,7 +46,15 @@ const MOCK_MESSAGES = {
 
 const statusColor = { online: "#22c55e", away: "#f59e0b", offline: "#64748b" }
 
-// ─── Generic Avatar (for contacts / chat partners — NOT clickable) ────────────
+// Deterministic pastel-blue hue per name, for group member colour-coding (WhatsApp-style)
+const NAME_COLORS = ["#60a5fa", "#34d399", "#fbbf24", "#f87171", "#c084fc", "#22d3ee", "#fb923c"]
+function colorForName(name = "") {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return NAME_COLORS[Math.abs(hash) % NAME_COLORS.length]
+}
+
+// ─── Generic Avatar (for contacts / DM partners — NOT clickable) ──────────────
 function Avatar({ initials, size = 40, status, imgSrc }) {
   return (
     <div style={{ position: "relative", flexShrink: 0 }}>
@@ -74,8 +82,48 @@ function Avatar({ initials, size = 40, status, imgSrc }) {
   )
 }
 
-// ─── Profile Avatar ───────────────────────────────────────────────────────────
-// Accepts onUpload (the store action) — handles preview + upload in one place
+// ─── Group Avatar — overlapping circles of first 2-3 members, WhatsApp style ──
+function GroupAvatar({ members = [], size = 40, imgSrc }) {
+  if (imgSrc) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        overflow: "hidden", border: "1.5px solid rgba(99,130,246,0.35)",
+      }}>
+        <img src={imgSrc} alt="group" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </div>
+    )
+  }
+
+  const shown = members.slice(0, 3)
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <div style={{
+        width: size, height: size, borderRadius: "50%",
+        background: "rgba(37,99,235,0.18)",
+        border: "1.5px solid rgba(99,130,246,0.3)",
+        display: "grid",
+        gridTemplateColumns: shown.length > 1 ? "1fr 1fr" : "1fr",
+        gridTemplateRows: shown.length > 2 ? "1fr 1fr" : "1fr",
+        overflow: "hidden",
+      }}>
+        {shown.map((m, i) => (
+          <div key={i} style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: `${colorForName(m.name)}33`,
+            color: colorForName(m.name),
+            fontSize: size * 0.2, fontWeight: 600,
+            gridColumn: shown.length === 3 && i === 0 ? "1 / 3" : "auto",
+          }}>
+            {m.avatar || m.name?.[0]}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Profile Avatar (clickable, with upload) ──────────────────────────────────
 function ProfileAvatar({ initials, size, imgSrc, onImageChange, onUpload }) {
   const [hovered, setHovered] = useState(false)
   const fileInputRef = useRef(null)
@@ -83,24 +131,17 @@ function ProfileAvatar({ initials, size, imgSrc, onImageChange, onUpload }) {
   const handleFile = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-
     if (!file.type.startsWith("image/")) {
       alert("Only image files are allowed (JPG, PNG, GIF, WebP…)")
       e.target.value = ""
       return
     }
-
     const reader = new FileReader()
     reader.onload = async (ev) => {
       const base64 = ev.target.result
-
-      // 1. Show preview instantly
       onImageChange(base64)
-
-      // 2. Upload to Cloudinary via store → backend
       if (onUpload) {
         const cloudinaryUrl = await onUpload(base64)
-        // 3. Swap base64 preview with the real Cloudinary URL
         if (cloudinaryUrl) onImageChange(cloudinaryUrl)
       }
     }
@@ -129,30 +170,23 @@ function ProfileAvatar({ initials, size, imgSrc, onImageChange, onUpload }) {
         {imgSrc
           ? <img src={imgSrc} alt="profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           : <span>{initials}</span>}
-
-        {/* Camera overlay on hover */}
         <div style={{
           position: "absolute", inset: 0, borderRadius: "50%",
           background: "rgba(0,0,0,0.6)",
           display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center",
-          opacity: hovered ? 1 : 0,
-          transition: "opacity 0.2s",
+          opacity: hovered ? 1 : 0, transition: "opacity 0.2s",
         }}>
           <span style={{ fontSize: size * 0.3, lineHeight: 1 }}>📷</span>
           <span style={{ fontSize: size * 0.2, color: "#fff", fontWeight: 600, marginTop: 2 }}>Edit</span>
         </div>
       </div>
-
-      {/* Online dot */}
       <span style={{
         position: "absolute", bottom: 1, right: 1,
         width: size * 0.25, height: size * 0.25,
         borderRadius: "50%", background: "#22c55e",
         border: "2px solid #0f172a", zIndex: 2,
       }} />
-
-      {/* Hidden file input — images only */}
       <input
         ref={fileInputRef}
         type="file"
@@ -164,12 +198,215 @@ function ProfileAvatar({ initials, size, imgSrc, onImageChange, onUpload }) {
   )
 }
 
+// ─── New Group Modal ───────────────────────────────────────────────────────────
+function NewGroupModal({ contacts, onClose, onCreate }) {
+  const [selected, setSelected] = useState([])
+  const [groupName, setGroupName] = useState("")
+  const [search, setSearch] = useState("")
+  const [step, setStep] = useState(1) // 1 = pick members, 2 = name the group
+
+  const toggleMember = (contact) => {
+    setSelected((prev) =>
+      prev.some((m) => m.id === contact.id)
+        ? prev.filter((m) => m.id !== contact.id)
+        : [...prev, contact]
+    )
+  }
+
+  const filtered = contacts.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+
+  const handleCreate = () => {
+    if (!groupName.trim() || selected.length === 0) return
+    onCreate({ name: groupName.trim(), members: selected })
+  }
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "rgba(0,0,0,0.6)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "16px",
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: "420px", maxHeight: "85vh",
+          background: "rgba(13,20,42,0.97)",
+          border: "0.5px solid rgba(99,130,246,0.25)",
+          borderRadius: "18px",
+          display: "flex", flexDirection: "column",
+          overflow: "hidden",
+          backdropFilter: "blur(20px)",
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: "10px",
+          padding: "16px 18px",
+          borderBottom: "0.5px solid rgba(99,130,246,0.15)",
+        }}>
+          {step === 2 && (
+            <button
+              onClick={() => setStep(1)}
+              style={{ background: "transparent", border: "none", color: "#60a5fa", fontSize: "20px", cursor: "pointer" }}
+            >←</button>
+          )}
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: "16px", fontWeight: 500, color: "#f0f6ff" }}>
+              {step === 1 ? "Add group members" : "New group"}
+            </div>
+            {step === 1 && selected.length > 0 && (
+              <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.6)", marginTop: "2px" }}>
+                {selected.length} selected
+              </div>
+            )}
+          </div>
+          <button onClick={onClose} style={{ background: "transparent", border: "none", color: "rgba(148,163,184,0.5)", fontSize: "20px", cursor: "pointer" }}>✕</button>
+        </div>
+
+        {step === 1 ? (
+          <>
+            {/* Selected chips */}
+            {selected.length > 0 && (
+              <div style={{ display: "flex", gap: "8px", padding: "12px 14px 0", flexWrap: "wrap" }}>
+                {selected.map((m) => (
+                  <div key={m.id} style={{
+                    display: "flex", alignItems: "center", gap: "6px",
+                    background: "rgba(37,99,235,0.2)", border: "0.5px solid rgba(99,130,246,0.3)",
+                    borderRadius: "16px", padding: "4px 8px 4px 4px",
+                  }}>
+                    <Avatar initials={m.avatar} size={22} />
+                    <span style={{ fontSize: "12px", color: "#e2e8f0" }}>{m.name.split(" ")[0]}</span>
+                    <span
+                      onClick={() => toggleMember(m)}
+                      style={{ cursor: "pointer", color: "rgba(148,163,184,0.6)", fontSize: "13px", marginLeft: "2px" }}
+                    >✕</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Search */}
+            <div style={{ padding: "12px 14px 4px", position: "relative" }}>
+              <span style={{ position: "absolute", left: "24px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: "rgba(99,130,246,0.5)", pointerEvents: "none" }}>🔍</span>
+              <input
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  background: "rgba(30,41,59,0.7)", border: "0.5px solid rgba(99,130,246,0.2)",
+                  borderRadius: "8px", padding: "9px 12px 9px 34px",
+                  color: "#e2e8f0", fontSize: "13px", outline: "none",
+                }}
+                placeholder="Search contacts…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            {/* Contact list with checkboxes */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "8px 0", minHeight: "200px" }}>
+              {filtered.map((contact) => {
+                const isSelected = selected.some((m) => m.id === contact.id)
+                return (
+                  <div
+                    key={contact.id}
+                    onClick={() => toggleMember(contact)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "12px",
+                      padding: "10px 16px", cursor: "pointer",
+                      background: isSelected ? "rgba(37,99,235,0.12)" : "transparent",
+                    }}
+                  >
+                    <Avatar initials={contact.avatar} size={38} status={contact.status} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0" }}>{contact.name}</div>
+                      <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.5)" }}>
+                        {contact.status === "online" ? "Online" : `Last seen ${contact.lastSeen}`}
+                      </div>
+                    </div>
+                    <div style={{
+                      width: "20px", height: "20px", borderRadius: "50%",
+                      border: `2px solid ${isSelected ? "#3b82f6" : "rgba(148,163,184,0.3)"}`,
+                      background: isSelected ? "#3b82f6" : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0, transition: "all 0.15s",
+                    }}>
+                      {isSelected && <span style={{ color: "#fff", fontSize: "12px" }}>✓</span>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Next button */}
+            <div style={{ padding: "14px 16px", borderTop: "0.5px solid rgba(99,130,246,0.15)" }}>
+              <button
+                onClick={() => selected.length > 0 && setStep(2)}
+                disabled={selected.length === 0}
+                style={{
+                  width: "100%", background: "#2563eb", color: "#fff", border: "none",
+                  borderRadius: "10px", padding: "11px", fontSize: "14px", fontWeight: 500,
+                  cursor: selected.length === 0 ? "not-allowed" : "pointer",
+                  opacity: selected.length === 0 ? 0.5 : 1,
+                }}
+              >
+                Next ({selected.length})
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Step 2: name the group */}
+            <div style={{ padding: "24px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+              <GroupAvatar members={selected} size={84} />
+              <input
+                autoFocus
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  background: "rgba(30,41,59,0.7)", border: "0.5px solid rgba(99,130,246,0.2)",
+                  borderRadius: "10px", padding: "11px 14px",
+                  color: "#e2e8f0", fontSize: "14px", outline: "none", textAlign: "center",
+                }}
+                placeholder="Group name…"
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+                maxLength={40}
+              />
+              <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.5)", textAlign: "center" }}>
+                {selected.map((m) => m.name.split(" ")[0]).join(", ")}
+              </div>
+            </div>
+
+            <div style={{ padding: "0 16px 16px" }}>
+              <button
+                onClick={handleCreate}
+                disabled={!groupName.trim()}
+                style={{
+                  width: "100%", background: "#2563eb", color: "#fff", border: "none",
+                  borderRadius: "10px", padding: "11px", fontSize: "14px", fontWeight: 500,
+                  cursor: !groupName.trim() ? "not-allowed" : "pointer",
+                  opacity: !groupName.trim() ? 0.5 : 1,
+                }}
+              >
+                Create Group
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 function Sidebar({
   displayName, initials, profileImg, setProfileImg, onUpload,
   tab, setTab, search, setSearch,
   filteredChats, filteredContacts,
   activePeer, onSelectPeer, logout, onClose,
+  onOpenNewGroup,
 }) {
   const pill = {
     display: "flex", margin: "12px 12px 0",
@@ -197,13 +434,9 @@ function Sidebar({
         padding: "16px 16px 12px",
         borderBottom: "0.5px solid rgba(99,130,246,0.15)",
       }}>
-        {/* ← onUpload is now correctly passed down */}
         <ProfileAvatar
-          initials={initials}
-          size={42}
-          imgSrc={profileImg}
-          onImageChange={setProfileImg}
-          onUpload={onUpload}
+          initials={initials} size={42} imgSrc={profileImg}
+          onImageChange={setProfileImg} onUpload={onUpload}
         />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -235,20 +468,36 @@ function Sidebar({
         <button style={tabBtn(tab === "contacts")} onClick={() => setTab("contacts")}>👥 Contacts</button>
       </div>
 
-      {/* Search */}
-      <div style={{ padding: "10px 12px 4px", position: "relative" }}>
-        <span style={{ position: "absolute", left: "22px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: "rgba(99,130,246,0.5)", pointerEvents: "none" }}>🔍</span>
-        <input
-          style={{
-            width: "100%", boxSizing: "border-box",
-            background: "rgba(30,41,59,0.7)", border: "0.5px solid rgba(99,130,246,0.2)",
-            borderRadius: "8px", padding: "8px 12px 8px 32px",
-            color: "#e2e8f0", fontSize: "13px", outline: "none",
-          }}
-          placeholder={tab === "chats" ? "Search chats…" : "Search contacts…"}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Search + New Group row */}
+      <div style={{ display: "flex", gap: "8px", padding: "10px 12px 4px", alignItems: "center" }}>
+        <div style={{ position: "relative", flex: 1 }}>
+          <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: "rgba(99,130,246,0.5)", pointerEvents: "none" }}>🔍</span>
+          <input
+            style={{
+              width: "100%", boxSizing: "border-box",
+              background: "rgba(30,41,59,0.7)", border: "0.5px solid rgba(99,130,246,0.2)",
+              borderRadius: "8px", padding: "8px 12px 8px 32px",
+              color: "#e2e8f0", fontSize: "13px", outline: "none",
+            }}
+            placeholder={tab === "chats" ? "Search chats…" : "Search contacts…"}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {tab === "chats" && (
+          <button
+            onClick={onOpenNewGroup}
+            title="New group"
+            style={{
+              flexShrink: 0, width: "34px", height: "34px",
+              background: "rgba(37,99,235,0.25)", border: "0.5px solid rgba(99,130,246,0.35)",
+              borderRadius: "8px", color: "#93c5fd", fontSize: "16px",
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(37,99,235,0.4)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "rgba(37,99,235,0.25)"}
+          >👥➕</button>
+        )}
       </div>
 
       {/* List */}
@@ -257,15 +506,22 @@ function Sidebar({
           ? filteredChats.length === 0
             ? <p style={{ textAlign: "center", color: "rgba(148,163,184,0.35)", fontSize: "13px", marginTop: "24px" }}>No chats found</p>
             : filteredChats.map((chat) => (
-              <div key={chat.id} style={listItem(activePeer?.id === chat.id)}
+              <div key={chat.id} style={listItem(activePeer?.id === chat.id && activePeer?.type === chat.type)}
                 onClick={() => onSelectPeer(chat)}
-                onMouseEnter={(e) => { if (activePeer?.id !== chat.id) e.currentTarget.style.background = "rgba(37,99,235,0.1)" }}
-                onMouseLeave={(e) => { if (activePeer?.id !== chat.id) e.currentTarget.style.background = "transparent" }}
+                onMouseEnter={(e) => { if (!(activePeer?.id === chat.id && activePeer?.type === chat.type)) e.currentTarget.style.background = "rgba(37,99,235,0.1)" }}
+                onMouseLeave={(e) => { if (!(activePeer?.id === chat.id && activePeer?.type === chat.type)) e.currentTarget.style.background = "transparent" }}
               >
-                <Avatar initials={chat.avatar} size={42} status={chat.status} />
+                {chat.type === "group"
+                  ? <GroupAvatar members={chat.members} size={42} imgSrc={chat.imgSrc} />
+                  : <Avatar initials={chat.avatar} size={42} status={chat.status} />}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chat.name}</div>
-                  <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chat.lastMsg}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    {chat.type === "group" && <span style={{ fontSize: "11px" }}>👥</span>}
+                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chat.name}</div>
+                  </div>
+                  <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {chat.type === "group" && chat.lastSender ? `${chat.lastSender}: ` : ""}{chat.lastMsg}
+                  </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px", flexShrink: 0 }}>
                   <span style={{ fontSize: "11px", color: "rgba(148,163,184,0.4)" }}>{chat.time}</span>
@@ -278,8 +534,8 @@ function Sidebar({
           : filteredContacts.length === 0
             ? <p style={{ textAlign: "center", color: "rgba(148,163,184,0.35)", fontSize: "13px", marginTop: "24px" }}>No contacts found</p>
             : filteredContacts.map((contact) => (
-              <div key={contact.id} style={listItem(activePeer?.id === contact.id)}
-                onClick={() => onSelectPeer(contact)}
+              <div key={contact.id} style={listItem(activePeer?.id === contact.id && activePeer?.type !== "group")}
+                onClick={() => onSelectPeer({ ...contact, type: "dm" })}
                 onMouseEnter={(e) => { if (activePeer?.id !== contact.id) e.currentTarget.style.background = "rgba(37,99,235,0.1)" }}
                 onMouseLeave={(e) => { if (activePeer?.id !== contact.id) e.currentTarget.style.background = "transparent" }}
               >
@@ -298,7 +554,6 @@ function Sidebar({
 
 // ─── ChatPage ─────────────────────────────────────────────────────────────────
 function ChatPage() {
-  // ── All hooks at the top, nothing outside this function ──
   const { authUser, logout, updateProfilePic } = useAuthStore()
 
   const [tab, setTab]                     = useState("chats")
@@ -308,15 +563,16 @@ function ChatPage() {
   const [mobilePanelOpen, setMobilePanel] = useState(false)
   const [search, setSearch]               = useState("")
   const [profileImg, setProfileImg]       = useState(null)
+  const [chats, setChats]                 = useState(MOCK_CHATS)
+  const [showNewGroup, setShowNewGroup]   = useState(false)
+  const [nextGroupId, setNextGroupId]     = useState(1000)
 
   const bottomRef = useRef(null)
 
-  // Sync profile pic from authUser whenever it changes (fixes refresh issue)
   useEffect(() => {
     if (authUser?.profilePic) setProfileImg(authUser.profilePic)
   }, [authUser])
 
-  // Auto scroll to latest message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, activePeer])
@@ -334,28 +590,62 @@ function ChatPage() {
     }
     setMessages((prev) => ({ ...prev, [activePeer.id]: [...(prev[activePeer.id] || []), msg] }))
     setInput("")
+
+    // update last message preview in the chat list
+    setChats((prev) => prev.map((c) =>
+      c.id === activePeer.id
+        ? { ...c, lastMsg: msg.text, time: msg.time, lastSender: activePeer.type === "group" ? "You" : undefined }
+        : c
+    ))
   }
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
-  // fullname (lowercase n) matches your MongoDB field
+  const handleCreateGroup = ({ name, members }) => {
+    const id = nextGroupId
+    setNextGroupId((n) => n + 1)
+
+    const newGroup = {
+      id, type: "group", name, members,
+      lastMsg: `You created the group "${name}"`,
+      lastSender: "", time: "now", unread: 0,
+    }
+
+    setChats((prev) => [newGroup, ...prev])
+
+    setMessages((prev) => ({
+      ...prev,
+      [id]: [
+        { id: 1, from: "system", text: `You created the group "${name}"`, time: "now" },
+        { id: 2, from: "system", text: `You added ${members.map((m) => m.name.split(" ")[0]).join(", ")}`, time: "now" },
+      ],
+    }))
+
+    setShowNewGroup(false)
+    setTab("chats")
+    setActivePeer(newGroup)
+    setMobilePanel(false)
+  }
+
   const displayName = authUser?.fullname || authUser?.fullName || authUser?.name || "You"
   const initials    = displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
 
-  const filteredChats    = MOCK_CHATS.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+  const filteredChats    = chats.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
   const filteredContacts = MOCK_CONTACTS.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
 
   const sidebarProps = {
     displayName, initials, profileImg, setProfileImg,
-    onUpload: updateProfilePic,   // ← store action passed as onUpload
+    onUpload: updateProfilePic,
     tab, setTab, search, setSearch,
     filteredChats, filteredContacts,
     activePeer, onSelectPeer: handleSelectPeer, logout,
+    onOpenNewGroup: () => setShowNewGroup(true),
   }
 
   const peerMsgs = activePeer ? (messages[activePeer.id] || []) : []
+  const isGroup = activePeer?.type === "group"
 
   return (
     <>
@@ -386,6 +676,15 @@ function ChatPage() {
         <div style={{ position: "fixed", top: "-120px", left: "-120px", width: "440px", height: "440px", background: "#1e40af", borderRadius: "50%", filter: "blur(110px)", opacity: 0.45, pointerEvents: "none", zIndex: 0 }} />
         <div style={{ position: "fixed", bottom: "-120px", right: "-120px", width: "440px", height: "440px", background: "#2563eb", borderRadius: "50%", filter: "blur(110px)", opacity: 0.45, pointerEvents: "none", zIndex: 0 }} />
         <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "340px", height: "340px", background: "#4f46e5", borderRadius: "50%", filter: "blur(110px)", opacity: 0.18, pointerEvents: "none", zIndex: 0 }} />
+
+        {/* New Group Modal */}
+        {showNewGroup && (
+          <NewGroupModal
+            contacts={MOCK_CONTACTS}
+            onClose={() => setShowNewGroup(false)}
+            onCreate={handleCreateGroup}
+          />
+        )}
 
         {/* Mobile overlay */}
         <div className="cp-mobile-overlay" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 50, display: mobilePanelOpen ? "block" : "none" }} onClick={() => setMobilePanel(false)} />
@@ -423,11 +722,8 @@ function ChatPage() {
               <button style={{ background: "transparent", border: "none", color: "#60a5fa", fontSize: "22px", cursor: "pointer" }} onClick={() => setMobilePanel(true)}>☰</button>
               <span style={{ flex: 1, fontSize: "17px", fontWeight: 500, color: "#f0f6ff" }}>Chat<span style={{ color: "#60a5fa" }}>Pulse</span></span>
               <ProfileAvatar
-                initials={initials}
-                size={32}
-                imgSrc={profileImg}
-                onImageChange={setProfileImg}
-                onUpload={updateProfilePic}
+                initials={initials} size={32} imgSrc={profileImg}
+                onImageChange={setProfileImg} onUpload={updateProfilePic}
               />
             </div>
 
@@ -436,11 +732,17 @@ function ChatPage() {
                 {/* Chat header */}
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 20px", borderBottom: "0.5px solid rgba(99,130,246,0.15)", background: "rgba(10,18,40,0.5)" }}>
                   <button className="cp-back-btn" style={{ display: "none", background: "transparent", border: "none", color: "#60a5fa", fontSize: "22px", cursor: "pointer", padding: "0 4px 0 0" }} onClick={() => setActivePeer(null)}>←</button>
-                  <Avatar initials={activePeer.avatar} size={40} status={activePeer.status} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#f0f6ff" }}>{activePeer.name}</div>
-                    <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "1px" }}>
-                      {activePeer.status === "online" ? "● Online" : activePeer.status === "away" ? "● Away" : "○ Offline"}
+
+                  {isGroup
+                    ? <GroupAvatar members={activePeer.members} size={40} imgSrc={activePeer.imgSrc} />
+                    : <Avatar initials={activePeer.avatar} size={40} status={activePeer.status} />}
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#f0f6ff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activePeer.name}</div>
+                    <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "1px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {isGroup
+                        ? `${activePeer.members.length} members: ${activePeer.members.map((m) => m.name.split(" ")[0]).join(", ")}`
+                        : activePeer.status === "online" ? "● Online" : activePeer.status === "away" ? "● Away" : "○ Offline"}
                     </div>
                   </div>
                 </div>
@@ -450,18 +752,38 @@ function ChatPage() {
                   {peerMsgs.length === 0 && (
                     <div style={{ textAlign: "center", color: "rgba(148,163,184,0.3)", fontSize: "13px", marginTop: "32px" }}>No messages yet. Say hello! 👋</div>
                   )}
-                  {peerMsgs.map((msg) => (
-                    <div key={msg.id} style={{
-                      maxWidth: "68%", alignSelf: msg.from === "me" ? "flex-end" : "flex-start",
-                      background: msg.from === "me" ? "rgba(37,99,235,0.75)" : "rgba(30,41,59,0.85)",
-                      border: msg.from === "me" ? "0.5px solid rgba(99,130,246,0.4)" : "0.5px solid rgba(99,130,246,0.15)",
-                      borderRadius: msg.from === "me" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-                      padding: "10px 14px",
-                    }}>
-                      <div style={{ fontSize: "14px", color: "#e2e8f0", lineHeight: 1.5, wordBreak: "break-word" }}>{msg.text}</div>
-                      <div style={{ fontSize: "10px", color: "rgba(148,163,184,0.4)", marginTop: "4px", textAlign: "right" }}>{msg.time}</div>
-                    </div>
-                  ))}
+                  {peerMsgs.map((msg) =>
+                    msg.from === "system" ? (
+                      // System / "you created the group" style message — centered pill
+                      <div key={msg.id} style={{
+                        alignSelf: "center",
+                        background: "rgba(30,41,59,0.6)",
+                        border: "0.5px solid rgba(99,130,246,0.15)",
+                        borderRadius: "12px", padding: "6px 14px",
+                        fontSize: "12px", color: "rgba(148,163,184,0.7)",
+                        textAlign: "center", maxWidth: "80%",
+                      }}>
+                        {msg.text}
+                      </div>
+                    ) : (
+                      <div key={msg.id} style={{
+                        maxWidth: "68%", alignSelf: msg.from === "me" ? "flex-end" : "flex-start",
+                        background: msg.from === "me" ? "rgba(37,99,235,0.75)" : "rgba(30,41,59,0.85)",
+                        border: msg.from === "me" ? "0.5px solid rgba(99,130,246,0.4)" : "0.5px solid rgba(99,130,246,0.15)",
+                        borderRadius: msg.from === "me" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                        padding: "10px 14px",
+                      }}>
+                        {/* sender name shown in groups for "them" messages */}
+                        {isGroup && msg.from !== "me" && msg.sender && (
+                          <div style={{ fontSize: "12px", fontWeight: 600, color: colorForName(msg.sender), marginBottom: "2px" }}>
+                            {msg.sender}
+                          </div>
+                        )}
+                        <div style={{ fontSize: "14px", color: "#e2e8f0", lineHeight: 1.5, wordBreak: "break-word" }}>{msg.text}</div>
+                        <div style={{ fontSize: "10px", color: "rgba(148,163,184,0.4)", marginTop: "4px", textAlign: "right" }}>{msg.time}</div>
+                      </div>
+                    )
+                  )}
                   <div ref={bottomRef} />
                 </div>
 
@@ -470,7 +792,7 @@ function ChatPage() {
                   <textarea
                     style={{ flex: 1, background: "rgba(30,41,59,0.8)", border: "0.5px solid rgba(99,130,246,0.2)", borderRadius: "12px", padding: "10px 14px", color: "#e2e8f0", fontSize: "14px", outline: "none", resize: "none", lineHeight: 1.5, maxHeight: "120px", overflowY: "auto", fontFamily: "inherit" }}
                     rows={1}
-                    placeholder="Type a message…"
+                    placeholder={isGroup ? `Message ${activePeer.name}…` : "Type a message…"}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
