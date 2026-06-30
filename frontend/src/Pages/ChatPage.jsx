@@ -69,12 +69,12 @@ function GroupAvatar({ members = [], size = 40, imgSrc }) {
         {shown.map((m, i) => (
           <div key={i} style={{
             display: "flex", alignItems: "center", justifyContent: "center",
-            background: `${colorForName(m.name)}33`,
-            color: colorForName(m.name),
+            background: `${colorForName(m.fullname)}33`,
+            color: colorForName(m.fullname),
             fontSize: size * 0.2, fontWeight: 600,
             gridColumn: shown.length === 3 && i === 0 ? "1 / 3" : "auto",
           }}>
-            {m.avatar || m.name?.[0]}
+            {m.profilePic || m.fullname?.[0]}
           </div>
         ))}
       </div>
@@ -236,8 +236,8 @@ function NewGroupModal({ contacts, onClose, onCreate }) {
                     background: "rgba(37,99,235,0.2)", border: "0.5px solid rgba(99,130,246,0.3)",
                     borderRadius: "16px", padding: "4px 8px 4px 4px",
                   }}>
-                    <Avatar initials={m.avatar} size={22} />
-                    <span style={{ fontSize: "12px", color: "#e2e8f0" }}>{m.name.split(" ")[0]}</span>
+                   <Avatar initials={m.fullname.split(" ").map((w) => w[0]).join("").slice(0, 2)}imgSrc={m.profilePic}size={22}/>
+                    <span style={{ fontSize: "12px", color: "#e2e8f0" }}>{m.fullname.split(" ")[0]}</span>
                     <span
                       onClick={() => toggleMember(m)}
                       style={{ cursor: "pointer", color: "rgba(148,163,184,0.6)", fontSize: "13px", marginLeft: "2px" }}
@@ -265,7 +265,7 @@ function NewGroupModal({ contacts, onClose, onCreate }) {
 
             {/* Contact list with checkboxes */}
             <div style={{ flex: 1, overflowY: "auto", padding: "8px 0", minHeight: "200px" }}>
-              {filtered.map((contact) => {
+              {filteredContacts.map((contact) => {
                 const isSelected = selected.some((m) => m.id === contact.id)
                 return (
                   <div
@@ -277,11 +277,11 @@ function NewGroupModal({ contacts, onClose, onCreate }) {
                       background: isSelected ? "rgba(37,99,235,0.12)" : "transparent",
                     }}
                   >
-                    <Avatar initials={contact.avatar} size={38} status={contact.status} />
+                    <Avatar initials={contact.fullname.split(" ").map((w) => w[0]).join("").slice(0, 2)}imgSrc={contact.profilePic}size={38}status={contact.status}/>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0" }}>{contact.name}</div>
+                      <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0" }}>{contact.fullname}</div>
                       <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.5)" }}>
-                        {contact.status === "online" ? "Online" : `Last seen ${contact.lastSeen}`}
+                        {contact.status === "online" ? "Online" : `Offline`}
                       </div>
                     </div>
                     <div style={{
@@ -333,7 +333,7 @@ function NewGroupModal({ contacts, onClose, onCreate }) {
                 maxLength={40}
               />
               <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.5)", textAlign: "center" }}>
-                {selected.map((m) => m.name.split(" ")[0]).join(", ")}
+                {selected.map((m) => m.fullname.split(" ")[0]).join(", ")}
               </div>
             </div>
 
@@ -471,11 +471,11 @@ function Sidebar({
               >
                 {chat.type === "group"
                   ? <GroupAvatar members={chat.members} size={42} imgSrc={chat.imgSrc} />
-                  : <Avatar initials={chat.avatar} size={42} status={chat.status} />}
+                  : <Avatar initials={chat.fullname.split(" ").map((w) => w[0]).join("").slice(0, 2)}imgSrc={chat.profilePic}size={42}status={chat.status}/>}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                     {chat.type === "group" && <span style={{ fontSize: "11px" }}>👥</span>}
-                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chat.name}</div>
+                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chat.fullname}</div>
                   </div>
                   <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {chat.type === "group" && chat.lastSender ? `${chat.lastSender}: ` : ""}{chat.lastMsg}
@@ -499,8 +499,8 @@ function Sidebar({
               >
                 <Avatar initials={contact.fullname.split(" ").map(word => word[0]).join("").slice(0, 2).toUpperCase()}imgSrc={contact.profilePic}size={42}/>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{contact.name}</div>
-                  <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "2px" }}>{contact.status === "online" ? "Online" : `Last seen ${contact.lastSeen}`}</div>
+                  <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{contact.fullname}</div>
+                  <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "2px" }}>{contact.status === "online" ? "Online" : `Offline`}</div>
                 </div>
               </div>
             ))
@@ -546,21 +546,20 @@ function ChatPage() {
 
   const handleSend = () => {
     if (!input.trim() || !activePeer) return
+    const peerId = activePeer._id || activePeer.id   // works for both real contacts and mock groups
     const msg = {
       id: Date.now(), from: "me", text: input.trim(),
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     }
-    setMessages((prev) => ({ ...prev, [activePeer.id]: [...(prev[activePeer.id] || []), msg] }))
+    setMessages((prev) => ({ ...prev, [peerId]: [...(prev[peerId] || []), msg] }))
     setInput("")
 
-    // update last message preview in the chat list
     setChats((prev) => prev.map((c) =>
-      c.id === activePeer.id
+      (c._id || c.id) === peerId
         ? { ...c, lastMsg: msg.text, time: msg.time, lastSender: activePeer.type === "group" ? "You" : undefined }
         : c
     ))
   }
-
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
@@ -580,8 +579,8 @@ function ChatPage() {
     setMessages((prev) => ({
       ...prev,
       [id]: [
-        { id: 1, from: "system", text: `You created the group "${name}"`, time: "now" },
-        { id: 2, from: "system", text: `You added ${members.map((m) => m.name.split(" ")[0]).join(", ")}`, time: "now" },
+        { id: 1, from: "system", text: `You created the group "${fullname}"`, time: "now" },
+        { id: 2, from: "system", text: `You added ${members.map((m) => m.fullname.split(" ")[0]).join(", ")}`, time: "now" },
       ],
     }))
 
@@ -591,10 +590,10 @@ function ChatPage() {
     setMobilePanel(false)
   }
 
-  const displayName = authUser?.fullname || authUser?.fullName || authUser?.name || "You"
+  const displayName = authUser?.fullname || authUser?.fullName || authUser?.fullname || "You"
   const initials    = displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
 
-  const filteredChats    = chats.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+  const filteredChats    = chats.filter((c) => c.fullname.toLowerCase().includes(search.toLowerCase()))
   const filteredContacts = contacts.filter((c) =>c.fullname.toLowerCase().includes(search.toLowerCase()))
 
   const sidebarProps = {
@@ -697,14 +696,13 @@ function ChatPage() {
 
                   {isGroup
                     ? <GroupAvatar members={activePeer.members} size={40} imgSrc={activePeer.imgSrc} />
-                    : <Avatar initials={activePeer.avatar} size={40} status={activePeer.status} />}
-
+                    : <Avatar initials={activePeer.fullname?.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()} imgSrc={activePeer.profilePic} size={40} status={activePeer.status}/>}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#f0f6ff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activePeer.name}</div>
+                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#f0f6ff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activePeer.fullname}</div>
                     <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "1px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {isGroup
-                        ? `${activePeer.members.length} members: ${activePeer.members.map((m) => m.name.split(" ")[0]).join(", ")}`
-                        : activePeer.status === "online" ? "● Online" : activePeer.status === "away" ? "● Away" : "○ Offline"}
+                        ? `${activePeer.members.length} members: ${activePeer.members.map((m) => m.fullname.split(" ")[0]).join(", ")}`
+                        : activePeer.status === "online" ? "● Online" : activePeer.status === "away" ? "● Away" : "Offline"}
                     </div>
                   </div>
                 </div>
@@ -754,7 +752,7 @@ function ChatPage() {
                   <textarea
                     style={{ flex: 1, background: "rgba(30,41,59,0.8)", border: "0.5px solid rgba(99,130,246,0.2)", borderRadius: "12px", padding: "10px 14px", color: "#e2e8f0", fontSize: "14px", outline: "none", resize: "none", lineHeight: 1.5, maxHeight: "120px", overflowY: "auto", fontFamily: "inherit" }}
                     rows={1}
-                    placeholder={isGroup ? `Message ${activePeer.name}…` : "Type a message…"}
+                    placeholder={isGroup ? `Message ${activePeer.fullname}…` : "Type a message…"}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -779,6 +777,7 @@ function ChatPage() {
       </div>
     </>
   )
+ 
 }
 
 export default ChatPage
