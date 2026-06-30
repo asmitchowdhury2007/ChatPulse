@@ -64,21 +64,38 @@ const useAuthStore = create((set) => ({
     },
 
     updateProfilePic: async (base64Image) => {
-        set({ isUpdatingPic: true });
-        try {
-            const res = await axiosInstance.put("/auth/profilePic", { profilePic: base64Image });
-            // store the cloudinary URL inside authUser
-            set((state) => ({
-                authUser: { ...state.authUser, profilePic: res.data.profilePic }
-            }));
-            toast.success("Profile photo updated!");
-            return res.data.profilePic   // return URL so UI can use it
-        } catch (err) {
-            toast.error("Failed to update profile photo");
-        } finally {
-            set({ isUpdatingPic: false });
-        }
-    },
+    set({ isUpdatingPic: true });
+
+    try {
+        
+
+        const res = await axiosInstance.put("/auth/profilePic", {
+            profilePic: base64Image,
+        });
+
+        
+
+        set((state) => ({
+            authUser: {
+                ...state.authUser,
+                profilePic: res.data.profilePic,
+            },
+        }));
+
+       
+
+        toast.success("Profile photo updated!");
+
+        
+
+        return res.data.profilePic;
+    } catch (err) {
+        console.log("ERROR:", err.response?.data || err.message);
+        toast.error("Failed to update profile photo");
+    } finally {
+        set({ isUpdatingPic: false });
+    }
+}
 }))
 
 
