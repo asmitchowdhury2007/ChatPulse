@@ -1,48 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import useAuthStore from "../Store/AuthStore.js"
+import useContactStore from "../Store/ContactStore.js"
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const MOCK_CONTACTS = [
-  { id: 1, name: "Aria Mehta",  avatar: "AM", status: "online",  lastSeen: "now" },
-  { id: 2, name: "Dev Sharma",  avatar: "DS", status: "online",  lastSeen: "now" },
-  { id: 3, name: "Kiran Roy",   avatar: "KR", status: "away",    lastSeen: "5m ago" },
-  { id: 4, name: "Priya Nair",  avatar: "PN", status: "offline", lastSeen: "2h ago" },
-  { id: 5, name: "Rohan Das",   avatar: "RD", status: "online",  lastSeen: "now" },
-  { id: 6, name: "Sneha Iyer",  avatar: "SI", status: "offline", lastSeen: "yesterday" },
-]
-
-const MOCK_CHATS = [
-  { id: 1, type: "dm", name: "Aria Mehta",  avatar: "AM", status: "online",  lastMsg: "Are you free tonight? 🎉",      time: "12:42 PM", unread: 2 },
-  { id: 2, type: "dm", name: "Dev Sharma",  avatar: "DS", status: "online",  lastMsg: "Pushed the fix, check it out", time: "11:15 AM", unread: 0 },
-  { id: 3, type: "dm", name: "Kiran Roy",   avatar: "KR", status: "away",    lastMsg: "Sounds good, see you then!",   time: "Yesterday",unread: 0 },
-  { id: 4, type: "dm", name: "Priya Nair",  avatar: "PN", status: "offline", lastMsg: "Thanks for your help 🙏",      time: "Mon",      unread: 1 },
-  { id: 5, type: "dm", name: "Rohan Das",   avatar: "RD", status: "online",  lastMsg: "Did you see the match?",       time: "Sun",      unread: 0 },
-]
-
-const MOCK_MESSAGES = {
-  1: [
-    { id: 1, from: "them", text: "Hey! How's it going?",                    time: "12:30 PM" },
-    { id: 2, from: "me",   text: "Pretty good! Just wrapping up some work.", time: "12:32 PM" },
-    { id: 3, from: "them", text: "Nice! Are you free tonight? 🎉",          time: "12:42 PM" },
-  ],
-  2: [
-    { id: 1, from: "them", text: "There was a bug in the auth flow",        time: "11:00 AM" },
-    { id: 2, from: "me",   text: "Yeah I saw it. Working on it.",           time: "11:05 AM" },
-    { id: 3, from: "them", text: "Pushed the fix, check it out",            time: "11:15 AM" },
-  ],
-  3: [
-    { id: 1, from: "me",   text: "Lunch at 1?",                             time: "Yesterday" },
-    { id: 2, from: "them", text: "Sounds good, see you then!",              time: "Yesterday" },
-  ],
-  4: [
-    { id: 1, from: "them", text: "Could you review my PR when free?",       time: "Mon" },
-    { id: 2, from: "me",   text: "Sure, I'll take a look.",                 time: "Mon" },
-    { id: 3, from: "them", text: "Thanks for your help 🙏",                 time: "Mon" },
-  ],
-  5: [
-    { id: 1, from: "them", text: "Did you see the match?",                  time: "Sun" },
-  ],
-}
 
 const statusColor = { online: "#22c55e", away: "#f59e0b", offline: "#64748b" }
 
@@ -213,8 +172,7 @@ function NewGroupModal({ contacts, onClose, onCreate }) {
     )
   }
 
-  const filtered = contacts.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
-
+  const filteredContacts = contacts.filter((contact) => contact.fullname.toLowerCase().includes(search.toLowerCase()))
   const handleCreate = () => {
     if (!groupName.trim() || selected.length === 0) return
     onCreate({ name: groupName.trim(), members: selected })
@@ -311,7 +269,7 @@ function NewGroupModal({ contacts, onClose, onCreate }) {
                 const isSelected = selected.some((m) => m.id === contact.id)
                 return (
                   <div
-                    key={contact.id}
+                    key={contact._id}
                     onClick={() => toggleMember(contact)}
                     style={{
                       display: "flex", alignItems: "center", gap: "12px",
@@ -534,12 +492,12 @@ function Sidebar({
           : filteredContacts.length === 0
             ? <p style={{ textAlign: "center", color: "rgba(148,163,184,0.35)", fontSize: "13px", marginTop: "24px" }}>No contacts found</p>
             : filteredContacts.map((contact) => (
-              <div key={contact.id} style={listItem(activePeer?.id === contact.id && activePeer?.type !== "group")}
+              <div key={contact._id} style={listItem(activePeer?._id === contact._id && activePeer?.type !== "group")}
                 onClick={() => onSelectPeer({ ...contact, type: "dm" })}
-                onMouseEnter={(e) => { if (activePeer?.id !== contact.id) e.currentTarget.style.background = "rgba(37,99,235,0.1)" }}
-                onMouseLeave={(e) => { if (activePeer?.id !== contact.id) e.currentTarget.style.background = "transparent" }}
+                onMouseEnter={(e) => { if (activePeer?._id !== contact._id) e.currentTarget.style.background = "rgba(37,99,235,0.1)" }}
+                onMouseLeave={(e) => { if (activePeer?._id !== contact._id) e.currentTarget.style.background = "transparent" }}
               >
-                <Avatar initials={contact.avatar} size={42} status={contact.status} />
+                <Avatar initials={contact.fullname.split(" ").map(word => word[0]).join("").slice(0, 2).toUpperCase()}imgSrc={contact.profilePic}size={42}/>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: "14px", fontWeight: 500, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{contact.name}</div>
                   <div style={{ fontSize: "12px", color: "rgba(148,163,184,0.55)", marginTop: "2px" }}>{contact.status === "online" ? "Online" : `Last seen ${contact.lastSeen}`}</div>
@@ -555,15 +513,15 @@ function Sidebar({
 // ─── ChatPage ─────────────────────────────────────────────────────────────────
 function ChatPage() {
   const { authUser, logout, updateProfilePic } = useAuthStore()
-
+  const {contacts,getAllContacts,isLoadingContacts} = useContactStore()
   const [tab, setTab]                     = useState("chats")
   const [activePeer, setActivePeer]       = useState(null)
-  const [messages, setMessages]           = useState(MOCK_MESSAGES)
+  const [messages, setMessages]           = useState({})
   const [input, setInput]                 = useState("")
   const [mobilePanelOpen, setMobilePanel] = useState(false)
   const [search, setSearch]               = useState("")
   const [profileImg, setProfileImg]       = useState(null)
-  const [chats, setChats]                 = useState(MOCK_CHATS)
+  const [chats, setChats]                 = useState([])
   const [showNewGroup, setShowNewGroup]   = useState(false)
   const [nextGroupId, setNextGroupId]     = useState(1000)
 
@@ -571,7 +529,11 @@ function ChatPage() {
 
   useEffect(() => {
     if (authUser?.profilePic) setProfileImg(authUser.profilePic)
-  }, [authUser])
+  }, [authUser]);
+
+  useEffect(() => {
+    getAllContacts();
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -633,7 +595,7 @@ function ChatPage() {
   const initials    = displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
 
   const filteredChats    = chats.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
-  const filteredContacts = MOCK_CONTACTS.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+  const filteredContacts = contacts.filter((c) =>c.fullname.toLowerCase().includes(search.toLowerCase()))
 
   const sidebarProps = {
     displayName, initials, profileImg, setProfileImg,
@@ -644,7 +606,7 @@ function ChatPage() {
     onOpenNewGroup: () => setShowNewGroup(true),
   }
 
-  const peerMsgs = activePeer ? (messages[activePeer.id] || []) : []
+  const peerMsgs = activePeer ? (messages[activePeer._id] || []) : []
   const isGroup = activePeer?.type === "group"
 
   return (
@@ -680,7 +642,7 @@ function ChatPage() {
         {/* New Group Modal */}
         {showNewGroup && (
           <NewGroupModal
-            contacts={MOCK_CONTACTS}
+            contacts={contacts}
             onClose={() => setShowNewGroup(false)}
             onCreate={handleCreateGroup}
           />
