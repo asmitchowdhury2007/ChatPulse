@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { useChatStore } from "../store/useChatStore";
-import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
-import { useAuthStore } from "../store/useAuthStore";
+import { useChatStore } from "../Store/useChatStore.js";
+import UsersLoadingSkeleton from "./UsersLoadingSkeleton.jsx";
+import { useAuthStore } from "../Store/useAuthStore.js";
 
 function ContactList() {
+  console.log("ContactList rendered");
   const { getAllContacts, allContacts, setSelectedUser, isUsersLoading } = useChatStore();
   const { onlineUsers } = useAuthStore();
 
@@ -17,6 +18,7 @@ function ContactList() {
     <>
       {allContacts.map((contact) => (
         <div
+          
           key={contact._id}
           className="p-4 transition-colors rounded-lg cursor-pointer bg-cyan-500/10 hover:bg-cyan-500/20"
           onClick={() => setSelectedUser(contact)}
@@ -27,7 +29,7 @@ function ContactList() {
                 <img src={contact.profilePic || "/avatar.png"} />
               </div>
             </div>
-            <h4 className="font-medium text-slate-200">{contact.fullName}</h4>
+            <h4 className="font-medium text-slate-200">{contact.fullname}</h4>
           </div>
         </div>
       ))}

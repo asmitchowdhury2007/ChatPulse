@@ -1,17 +1,19 @@
 import { useChatStore } from "../Store/useChatStore";
 
-import BorderAnimatedContainer from "../components/BorderAnimatedContainer.jsx";
+import BorderAnimatedContainer from "../Components/BorderAnimatedContainer.jsx";
 import ProfileHeader from "../Components/ProfileHeader";
-import ActiveTabSwitch from "../components/ActiveTabSwitch";
-import ChatsList from "../components/ChatsList";
-import ContactList from "../components/ContactList";
-import ChatContainer from "../components/ChatContainer";
-import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
+import ActiveTabSwitch from "../Components/ActiveTabSwitch";
+import ChatsList from "../Components/ChatsList";
+import ContactList from "../Components/ContactList";
+import ChatContainer from "../Components/ChatContainer";
+import NoConversationPlaceholder from "../Components/NoConversationPlaceholder";
 
 function ChatPage() {
+  
   const { activeTab, selectedUser } = useChatStore();
-
+  console.log("activeTab:", activeTab);
   return (
+    
     <div className="relative w-full max-w-6xl h-[800px]">
       <BorderAnimatedContainer>
         {/* LEFT SIDE */}

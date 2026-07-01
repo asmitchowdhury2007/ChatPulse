@@ -22,12 +22,16 @@ export const useChatStore = create((set, get) => ({
   setSelectedUser: (selectedUser) => set({ selectedUser }),
 
   getAllContacts: async () => {
+    console.log("1. Function started");
     set({ isUsersLoading: true });
     try {
+      console.log("Before Api call");
       const res = await axiosInstance.get("/messages/contacts");
-      console.log(Array.isArray(res.data));
+      console.log(res.data);
       set({ allContacts: res.data });
     } catch (error) {
+      console.log("Error:", error);
+      console.log(error.response);
       toast.error(error.response.data.message);
     } finally {
       set({ isUsersLoading: false });
@@ -87,7 +91,7 @@ export const useChatStore = create((set, get) => ({
   },
 
   subscribeToMessages: () => {
-    const { selectedUser, isSoundEnabled } = get();
+    /*const { selectedUser, isSoundEnabled } = get();
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
@@ -104,12 +108,15 @@ export const useChatStore = create((set, get) => ({
 
         notificationSound.currentTime = 0; // reset to start
         notificationSound.play().catch((e) => console.log("Audio play failed:", e));
-      }
-    });
+      
+     
+    });*/
+    return null;
   },
 
   unsubscribeFromMessages: () => {
-    const socket = useAuthStore.getState().socket;
-    socket.off("newMessage");
+    /*const socket = useAuthStore.getState().socket;
+    socket.off("newMessage");*/
+    return null;
   },
 }));
