@@ -1,7 +1,7 @@
 // src/pages/LoginPage.jsx
 import { useState } from "react"
 import { Link, useNavigate } from "react-router"
-import useAuthStore from "../Store/AuthStore.js"
+import {useAuthStore} from "../Store/useAuthStore.js"
 
 function LoginPage() {
 

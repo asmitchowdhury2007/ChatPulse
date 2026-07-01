@@ -3,7 +3,7 @@ import { Routes, Route,Navigate } from "react-router"
 import ChatPage from "./pages/ChatPage.jsx"
 import LoginPage from "./pages/LoginPage.jsx"
 import SignupPage from "./pages/SignupPage.jsx"
-import useAuthStore from "./Store/AuthStore.js"
+import {useAuthStore} from "./Store/useAuthStore.js"
 import { useEffect } from "react"
 import {Toaster} from "react-hot-toast"
 
@@ -13,7 +13,7 @@ function App() {
     checkAuth()
   },[checkAuth])
   
-  if (isCheckingAuth) return null 
+  if (isCheckingAuth) return ;
   return (
   <>
   

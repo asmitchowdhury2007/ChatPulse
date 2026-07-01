@@ -5,7 +5,7 @@ import cloudinary from"../lib/cloudinary.js"
 async function getAllContacts(req,res){
     const loggedInUserID = req.user._id;
     const AllContacts = await user.find({_id :{$ne : loggedInUserID}}).select("-password");
-    return res.status(200).json({contacts: AllContacts});
+    return res.status(200).json(AllContacts);
 
 }
 
@@ -31,7 +31,7 @@ async function getMessageByID(req,res){
             {senderID : FriendID , receivedID : loggedInUserID},
         ]
     }).sort({createdAt : 1});
-    return res.status(200).json({messages : Allmessages });
+    return res.status(200).json(Allmessages);
 }
 
 async function sendMessage(req,res){
@@ -51,7 +51,7 @@ async function sendMessage(req,res){
         image : imageURL,
     });
 
-    return res.status(201).json({ message: sendMessage });
+    return res.status(201).json(sendMessage);
 }
 
 export {
