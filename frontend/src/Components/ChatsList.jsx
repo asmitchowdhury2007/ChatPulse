@@ -3,6 +3,7 @@ import { useChatStore } from "../Store/useChatStore";
 import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
 import NoChatsFound from "./NoChatsFound";
 import { useAuthStore } from "../Store/useAuthStore";
+import Avatar from "./Avatar.jsx"
 
 function ChatsList() {
   const { getMyChatPartners, chats, isUsersLoading, setSelectedUser } = useChatStore();
@@ -25,9 +26,12 @@ function ChatsList() {
         >
           <div className="flex items-center gap-3">
             <div className={`avatar ${onlineUsers.includes(chat._id) ? "online" : "offline"}`}>
-              <div className="rounded-full size-12">
-                <img src={chat.profilePic || "/avatar.png"} alt={chat.fullname} />
-              </div>
+              <Avatar
+                fullname={chat.fullname}
+                profilePic={chat.profilePic}
+                size={48}
+              />
+              
             </div>
             <h4 className="font-medium truncate text-slate-200">{chat.fullname}</h4>
           </div>
