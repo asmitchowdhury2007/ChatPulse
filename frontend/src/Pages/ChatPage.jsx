@@ -22,7 +22,7 @@ function ChatPage() {
           <ActiveTabSwitch />
 
           <div className="flex-1 p-4 space-y-2 overflow-y-auto">
-            <ChatsList />
+            {activeTab === "chats" ? <ChatsList /> : <ContactList />}
           </div>
         </div>
 

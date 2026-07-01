@@ -91,7 +91,7 @@ export const useChatStore = create((set, get) => ({
   },
 
   subscribeToMessages: () => {
-    const { selectedUser, isSoundEnabled } = get();
+    /*const { selectedUser, isSoundEnabled } = get();
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
@@ -108,12 +108,15 @@ export const useChatStore = create((set, get) => ({
 
         notificationSound.currentTime = 0; // reset to start
         notificationSound.play().catch((e) => console.log("Audio play failed:", e));
-      }
-    });
+      
+     
+    });*/
+    return null;
   },
 
   unsubscribeFromMessages: () => {
-    const socket = useAuthStore.getState().socket;
-    socket.off("newMessage");
+    /*const socket = useAuthStore.getState().socket;
+    socket.off("newMessage");*/
+    return null;
   },
 }));
