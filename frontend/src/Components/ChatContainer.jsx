@@ -38,10 +38,16 @@ function ChatContainer() {
       <div className="flex-1 px-6 py-8 overflow-y-auto">
         {messages.length > 0 && !isMessagesLoading ? (
           <div className="max-w-3xl mx-auto space-y-6">
-            {messages.map((msg) => (
+            {messages.map((msg) => {
+              console.log(
+  "senderId:", msg.senderID,
+  "authUser:", authUser._id,
+  "equal:", msg.senderID === authUser._id
+);
+            return (
               <div
                 key={msg._id}
-                className={`chat ${msg.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+                className={`chat ${msg.senderID === authUser._id ? "chat-end" : "chat-start"}`}
               >
                 <div
                   className={`chat-bubble relative ${
@@ -62,7 +68,8 @@ function ChatContainer() {
                   </p>
                 </div>
               </div>
-            ))}
+              )
+            })};
             {/* 👇 scroll target */}
             <div ref={messageEndRef} />
           </div>
@@ -72,8 +79,9 @@ function ChatContainer() {
           <NoChatHistoryPlaceholder name={selectedUser.fullName} />
         )}
       </div>
-
+    
       <MessageInput />
+      
     </>
   );
 }
