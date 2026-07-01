@@ -5,6 +5,7 @@ import cloudinary from"../lib/cloudinary.js"
 async function getAllContacts(req,res){
     const loggedInUserID = req.user._id;
     const AllContacts = await user.find({_id :{$ne : loggedInUserID}}).select("-password");
+    console.log("getAllContacts called");
     return res.status(200).json(AllContacts);
 
 }

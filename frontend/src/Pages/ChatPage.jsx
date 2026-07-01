@@ -9,9 +9,11 @@ import ChatContainer from "../components/ChatContainer";
 import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
 
 function ChatPage() {
+  
   const { activeTab, selectedUser } = useChatStore();
-
+  console.log("activeTab:", activeTab);
   return (
+    
     <div className="relative w-full max-w-6xl h-[800px]">
       <BorderAnimatedContainer>
         {/* LEFT SIDE */}
@@ -20,7 +22,7 @@ function ChatPage() {
           <ActiveTabSwitch />
 
           <div className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {activeTab === "chats" ? <ChatsList /> : <ContactList />}
+            <ChatsList />
           </div>
         </div>
 

@@ -22,12 +22,16 @@ export const useChatStore = create((set, get) => ({
   setSelectedUser: (selectedUser) => set({ selectedUser }),
 
   getAllContacts: async () => {
+    console.log("1. Function started");
     set({ isUsersLoading: true });
     try {
+      console.log("Before Api call");
       const res = await axiosInstance.get("/messages/contacts");
-      console.log(Array.isArray(res.data));
+      console.log(res.data);
       set({ allContacts: res.data });
     } catch (error) {
+      console.log("Error:", error);
+      console.log(error.response);
       toast.error(error.response.data.message);
     } finally {
       set({ isUsersLoading: false });
