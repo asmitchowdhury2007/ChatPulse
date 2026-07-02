@@ -14,11 +14,12 @@ async function SocketAuthMiddleware(socket,next){
             const User = await user.findById(decoded.id).select("-password");
             if(!User) return next(new Error("User Not Found"));
             socket.user = User;
+            socket.userId = User._id.toString();
             next()
 
         }
         else{
-            return next(new Error("Unauthorised"))
+            return next(new Error("Invalid Token"))
         }
 
     }catch(err){
