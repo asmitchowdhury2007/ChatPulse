@@ -1,13 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express"
+import {app,server,io} from "./lib/socket.js"
 import authRoute from "./routes/auth.route.js";
 import messageRoute  from "./routes/message.route.js";
 import { fileURLToPath } from "url";
 import cors from "cors";
 import path from "path";
 import {ConnectionDB} from "./lib/db.js"
-const app = express();
+
 import cookieParser from "cookie-parser";
 
 ConnectionDB(process.env.MONGO_URI).then(() => console.log("MongoDB running..."));
@@ -33,4 +34,4 @@ if(process.env.NODE_ENV=== "production"){
 
 
 
-app.listen(process.env.PORT,() => console.log("Server running..."));
+server.listen(process.env.PORT,() => console.log("Server running..."));
