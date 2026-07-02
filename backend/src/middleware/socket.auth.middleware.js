@@ -23,7 +23,8 @@ async function SocketAuthMiddleware(socket,next){
         }
 
     }catch(err){
-        
+        console.log("Error in socket authentication :", err.message);
+        next(new Error("Unauthorised - Authentication Failed"));
     }
     
 }
