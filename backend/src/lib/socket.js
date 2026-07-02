@@ -3,7 +3,7 @@ dotenv.config();
 import {Server} from "socket.io";
 import  express from "express";
 import http from "http";
-import {SocketAuthMiddleware} from "../middleware/socket.js"
+import {SocketAuthMiddleware} from "../middleware/socket.auth.middleware.js"
 
 
 const app = express();
@@ -31,11 +31,16 @@ io.on("connection", (socket)=>{
 
     socket.on("disconnect", () =>{
         console.log("A user disconnected" , socket.user.fullname);
+        delete userSocketMap[userId];
+        io.emit("getOnlineUsers", Object.keys(userSocketMap)); 
     })
 })
 
+export {
+    app,
+    server,
+    io
+}
 
 
 
-
-server.listen(process.env.PORT , () => console.log(`Server running...`));
