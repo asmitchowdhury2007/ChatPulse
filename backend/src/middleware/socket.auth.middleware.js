@@ -28,3 +28,7 @@ async function SocketAuthMiddleware(socket,next){
     }
     
 }
+
+export {
+    SocketAuthMiddleware
+}
