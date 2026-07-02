@@ -1,3 +1,4 @@
+import { io } from "socket.io-client";
 import { create } from "zustand";
 import  axiosInstance  from "../lib/axios.js";
 import toast from "react-hot-toast";
@@ -92,7 +93,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  ConnectSocket : async() => {
+  ConnectSocket : () => {
     const {authUser} = get();
     if (! authUser || get().socket?.connected) return 
     const socket = io(BASE_URL,{
@@ -106,6 +107,10 @@ export const useAuthStore = create((set, get) => ({
       set({onlineUsers: userIds});
     })
   },
-
+  disconnectSocket : () =>{
+    if(get().socket.connected){
+      get().socket.disconnect();
+    }
+  }
   
 }));
