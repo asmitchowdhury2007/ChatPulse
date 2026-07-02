@@ -31,11 +31,16 @@ io.on("connection", (socket)=>{
 
     socket.on("disconnect", () =>{
         console.log("A user disconnected" , socket.user.fullname);
+        delete userSocketMap[userId];
+        io.emit("getOnlineUsers", Object.keys(userSocketMap)); 
     })
 })
 
+export {
+    app,
+    server,
+    io
+}
 
 
 
-
-server.listen(process.env.PORT , () => console.log(`Server running...`));
