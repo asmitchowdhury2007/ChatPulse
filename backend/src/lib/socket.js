@@ -36,10 +36,15 @@ io.on("connection", (socket)=>{
     })
 })
 
+function getReceiverSocketId(userId){
+    return userSocketMap[userId];
+}
+
 export {
     app,
     server,
-    io
+    io,
+    getReceiverSocketId,
 }
 
 
