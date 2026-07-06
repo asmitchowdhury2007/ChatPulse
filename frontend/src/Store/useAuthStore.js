@@ -14,7 +14,7 @@ export const useAuthStore = create((set, get) => ({
   isUpdatingPic:false,
   onlineUsers: [],
   socket : null,
-  onlineUsers:[],
+ 
 
   checkAuth: async () => {
     console.log("1. checkAuth started");
