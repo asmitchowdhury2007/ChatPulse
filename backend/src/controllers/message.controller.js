@@ -1,7 +1,7 @@
 import message from "../models/message.js"
 import user from "../models/user.js"
 import cloudinary from"../lib/cloudinary.js"
-import {getReceiverSocketId} from "../lib/socket.js"
+import {io,getReceiverSocketId} from "../lib/socket.js"
 
 async function getAllContacts(req,res){
     const loggedInUserID = req.user._id;
