@@ -52,7 +52,10 @@ async function sendMessage(req,res){
         text,
         image : imageURL,
     });
-    const socketId = getReceiverSocketId(receivedID);
+    const receiverSocketId = getReceiverSocketId(receivedID);
+    if(receiverSocketId){
+        io.to(receiverSocketId).emit("newMessages", sendMessage);
+    }
 
     return res.status(201).json(sendMessage);
 }
