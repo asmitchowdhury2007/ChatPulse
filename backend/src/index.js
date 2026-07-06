@@ -8,7 +8,6 @@ import { fileURLToPath } from "url";
 import cors from "cors";
 import path from "path";
 import {ConnectionDB} from "./lib/db.js"
-
 import cookieParser from "cookie-parser";
 
 ConnectionDB(process.env.MONGO_URI).then(() => console.log("MongoDB running..."));
