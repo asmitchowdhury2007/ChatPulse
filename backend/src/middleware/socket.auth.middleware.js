@@ -6,7 +6,7 @@ import {verifyToken} from "../lib/utils.js"
 import cookie from "cookie";
 
 async function SocketAuthMiddleware(socket,next){
-    console.log("Handshake received");
+    
     try{
         const cookies = cookie.parse(socket.handshake.headers.cookie || "");
         const token = cookies.uid;
@@ -17,7 +17,7 @@ async function SocketAuthMiddleware(socket,next){
             if(!User) return next(new Error("User Not Found"));
             socket.user = User;
             socket.userId = User._id.toString();
-            console.log("Authentication Successful");
+           
             next()
 
         }
@@ -26,7 +26,7 @@ async function SocketAuthMiddleware(socket,next){
         }
 
     }catch(err){
-        console.log("Error in socket authentication :", err.message);
+        
         next(new Error("Unauthorised - Authentication Failed"));
     }
     
