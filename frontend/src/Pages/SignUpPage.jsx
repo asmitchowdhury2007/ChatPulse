@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router"
 import {useAuthStore} from "../Store/useAuthStore.js"
-import "../Components/Signup.css"
+
 
 function SignupPage() {
 

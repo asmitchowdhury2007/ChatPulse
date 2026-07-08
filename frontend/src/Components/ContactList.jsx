@@ -5,7 +5,7 @@ import { useAuthStore } from "../Store/useAuthStore.js";
 import Avatar from "./Avatar.jsx"
 
 function ContactList() {
-  console.log("ContactList rendered");
+  
   const { getAllContacts, allContacts, setSelectedUser, isUsersLoading } = useChatStore();
   const { onlineUsers } = useAuthStore();
 

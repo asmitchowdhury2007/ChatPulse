@@ -21,16 +21,16 @@ io.use(SocketAuthMiddleware);
 const userSocketMap = {};
 
 io.on("connection", (socket)=>{
-    console.log("A new User welcomed", socket.user.fullname);
+    
     const test = socket.user._id;
-    console.log(typeof(test));
+    
     const userId = socket.userId;
     userSocketMap[userId] = socket.id;  
     io.emit("getOnlineUsers", Object.keys(userSocketMap));  
 
 
     socket.on("disconnect", () =>{
-        console.log("A user disconnected" , socket.user.fullname);
+        
         delete userSocketMap[userId];
         io.emit("getOnlineUsers", Object.keys(userSocketMap)); 
     })

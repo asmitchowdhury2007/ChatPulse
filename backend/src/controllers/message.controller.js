@@ -6,7 +6,7 @@ import {io,getReceiverSocketId} from "../lib/socket.js"
 async function getAllContacts(req,res){
     const loggedInUserID = req.user._id;
     const AllContacts = await user.find({_id :{$ne : loggedInUserID}}).select("-password");
-    console.log("getAllContacts called");
+    
     return res.status(200).json(AllContacts);
 
 }
@@ -54,7 +54,7 @@ async function sendMessage(req,res){
     });
     const receiverSocketId = getReceiverSocketId(receivedID);
     if(receiverSocketId){
-        console.log("Emitting newMessages");
+        
         io.to(receiverSocketId).emit("newMessages", sendMessage);
     }
 
