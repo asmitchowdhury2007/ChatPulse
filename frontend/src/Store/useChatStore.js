@@ -11,27 +11,22 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
-  isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
-
-  toggleSound: () => {
-    localStorage.setItem("isSoundEnabled", !get().isSoundEnabled);
-    set({ isSoundEnabled: !get().isSoundEnabled });
-  },
+  
+  
 
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedUser: (selectedUser) => set({ selectedUser }),
 
   getAllContacts: async () => {
-    console.log("1. Function started");
+    
     set({ isUsersLoading: true });
     try {
-      console.log("Before Api call");
+      
       const res = await axiosInstance.get("/messages/contacts");
-      console.log(res.data);
+      
       set({ allContacts: res.data });
     } catch (error) {
-      console.log("Error:", error);
-      console.log(error.response);
+      
       toast.error(error.response.data.message);
     } finally {
       set({ isUsersLoading: false });
@@ -97,7 +92,7 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessages", (newMessage) => {
-      console.log("Socket received:", newMessage);
+      
       const isMessageSentFromSelectedUser = newMessage.senderID === selectedUser._id;
       if (!isMessageSentFromSelectedUser) return;
 

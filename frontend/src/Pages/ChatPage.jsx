@@ -11,7 +11,7 @@ import NoConversationPlaceholder from "../Components/NoConversationPlaceholder";
 function ChatPage() {
   
   const { activeTab, selectedUser } = useChatStore();
-  console.log("activeTab:", activeTab);
+  
   return (
     
     <div className="relative w-full max-w-6xl h-[800px]">

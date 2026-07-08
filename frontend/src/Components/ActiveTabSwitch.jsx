@@ -16,7 +16,7 @@ function ActiveTabSwitch() {
 
       <button
         onClick={() => {
-          console.log("Contacts button clicked");
+          
           setActiveTab("contacts")
         }} 
         className={`tab ${

@@ -39,11 +39,7 @@ function ChatContainer() {
         {messages.length > 0 && !isMessagesLoading ? (
           <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((msg) => {
-              console.log(
-  "senderId:", msg.senderID,
-  "authUser:", authUser._id,
-  "equal:", msg.senderID === authUser._id
-);
+              
             return (
               <div
                 key={msg._id}
@@ -76,7 +72,7 @@ function ChatContainer() {
         ) : isMessagesLoading ? (
           <MessagesLoadingSkeleton />
         ) : (
-          <NoChatHistoryPlaceholder name={selectedUser.fullName} />
+          <NoChatHistoryPlaceholder name={selectedUser.fullname} />
         )}
       </div>
     
