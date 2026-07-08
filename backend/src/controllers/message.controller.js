@@ -54,6 +54,7 @@ async function sendMessage(req,res){
     });
     const receiverSocketId = getReceiverSocketId(receivedID);
     if(receiverSocketId){
+        console.log("Emitting newMessages");
         io.to(receiverSocketId).emit("newMessages", sendMessage);
     }
 
