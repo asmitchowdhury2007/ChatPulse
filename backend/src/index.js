@@ -11,6 +11,7 @@ import {ConnectionDB} from "./lib/db.js"
 import cookieParser from "cookie-parser";
 
 ConnectionDB(process.env.MONGO_URI).then(() => console.log("MongoDB running..."));
+const PORT = process.env.PORT || 9000
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,4 +34,4 @@ if(process.env.NODE_ENV=== "production"){
 
 
 
-server.listen(process.env.PORT,() => console.log("Server running..."));
+server.listen(PORT ,() => console.log("Server running..."));
