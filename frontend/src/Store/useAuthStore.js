@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 const BASE_URL = import.meta.env.MODE === "development"
   ? "http://localhost:9000/api"
-  : import.meta.env.VITE_API_URL;
+  : import.meta.env.VITE_API_URL/api;
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
