@@ -41,7 +41,7 @@ async function signup(req,res){
                 maxAge : 7*24*60*60*1000,
                 httpOnly: true,         
                 secure:process.env.NODE_ENV==="production",       
-                sameSite: "strict"
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             });
             await sendEmail(newUser.fullname, newUser.email);
             return res.status(201).json({
@@ -71,7 +71,7 @@ async function login (req,res){
             maxAge : 7*24*60*60*1000,
             httpOnly: true,         
             secure:process.env.NODE_ENV==="production",       
-            sameSite: "strict"
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         });
         return res.status(201).json({
             _id : User._id,
@@ -88,7 +88,7 @@ async function logout (req,res){
     res.clearCookie("uid", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
     return res.status(200).json({ message: "Logged out successfully" });
 
