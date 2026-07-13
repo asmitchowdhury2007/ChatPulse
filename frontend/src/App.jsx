@@ -2,7 +2,7 @@
 import { Routes, Route,Navigate } from "react-router" 
 import ChatPage from "./Pages/ChatPage.jsx"
 import LoginPage from "./Pages/LoginPage.jsx"
-import SignupPage from "./Pages/SignupPage.jsx"
+import SignupPage from "./Pages/SignUpPage.jsx"
 import {useAuthStore} from "./Store/useAuthStore.js"
 import { useEffect } from "react"
 import {Toaster} from "react-hot-toast"
