@@ -9,7 +9,7 @@ async function SocketAuthMiddleware(socket,next){
     
     try{
         const cookies = cookie.parse(socket.handshake.headers.cookie || "");
-        console.log("Handshake Cookies:", socket.handshake.headers.cookie);
+        
         const token = cookies.uid;
         if(!token) return next(new Error("Unauthorised"));
         const decoded = verifyToken(token);

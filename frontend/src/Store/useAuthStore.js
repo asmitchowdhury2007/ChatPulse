@@ -106,11 +106,11 @@ export const useAuthStore = create((set, get) => ({
     })
     console.log("Socket object:", socket);
     socket.on("connect", () => {
-    console.log("Connected!");
+    
   });
 
   socket.on("connect_error", (err) => {
-    console.log("Connect error:", err.message);
+    
   });
 
     //socket.connect();
