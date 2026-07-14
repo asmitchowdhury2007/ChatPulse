@@ -21,11 +21,14 @@ io.use(SocketAuthMiddleware);
 const userSocketMap = {};
 
 io.on("connection", (socket)=>{
-    
+    console.log("Connected");
+    console.log("socket.user =", socket.user);
+    console.log("socket.userId =", socket.userId);
     const test = socket.user._id;
     
     const userId = socket.userId;
     userSocketMap[userId] = socket.id;  
+    console.log(userSocketMap);
     io.emit("getOnlineUsers", Object.keys(userSocketMap));  
 
 
