@@ -8,6 +8,12 @@ const BASE_URL = import.meta.env.MODE === "development"
   ? "http://localhost:9000/api"
   : import.meta.env.VITE_API_URL;
 
+const SOCKET_URL =
+  import.meta.env.MODE === "development"
+    ? "http://localhost:9000"
+    : import.meta.env.VITE_API_URL;
+
+
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isCheckingAuth: true,
@@ -92,12 +98,22 @@ export const useAuthStore = create((set, get) => ({
   },
 
   ConnectSocket : () => {
+    console.log("ConnectSocket called");
     const {authUser} = get();
     if (! authUser || get().socket?.connected) return 
-    const socket = io(BASE_URL,{
+    const socket = io(SOCKET_URL,{
       withCredentials : true,
     })
-    socket.connect();
+    console.log("Socket object:", socket);
+    socket.on("connect", () => {
+    console.log("Connected!");
+  });
+
+  socket.on("connect_error", (err) => {
+    console.log("Connect error:", err.message);
+  });
+
+    //socket.connect();
     set({socket});
 
 
